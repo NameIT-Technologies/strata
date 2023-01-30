@@ -75,12 +75,40 @@ public class APIController {
 
     }
 
-    @GetMapping("/gettickets/{agentid}")
+    /*@GetMapping("/gettickets/{agentid}")
     public List<TicketDetails> getTickets(@PathVariable Long agentid)
     {
         System.out.println("Agent ID => "+ agentid);
         return  tktRepo.findByAgentId(agentid);
+    }*/
+
+
+    @GetMapping("/gettickets/{agentid}")
+    public ResponseEntity<Object> getTickets(@PathVariable Long agentid)
+    {
+        System.out.println("Agent ID => "+ agentid);
+        List<TicketDetails> tkts=  tktRepo.findByAgentId(agentid);
+        List<TicketDetails> manipulatedTkts=new ArrayList<>();
+        for(TicketDetails tkt: tkts)
+        {
+            if(tkt.getTicketStatus().equalsIgnoreCase( "NEW")) {
+                tkt.setTicketStatus("warning");
+                manipulatedTkts.add(tkt);
+            }else
+            {
+                tkt.setTicketStatus("success");
+                manipulatedTkts.add(tkt);
+            }
+        }
+        try
+        {
+            return ResponseHandler.generateResponse("Success", HttpStatus.OK, manipulatedTkts);
+        }catch (Exception e)
+        {
+            return ResponseHandler.generateResponse(e.getMessage(),HttpStatus.MULTI_STATUS, null);
+        }
     }
+
 
     @GetMapping("/getticket/{ticketid}")
     public List<TicketDetails> getTicketDtl(@PathVariable Long ticketid)
